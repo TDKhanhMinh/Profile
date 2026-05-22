@@ -1,82 +1,118 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
-import { Play, Pause, RotateCcw, FastForward, Rewind, ShieldAlert, Crosshair, HelpCircle, Eye, EyeOff, Search } from "lucide-react";
 import { SectionTitle } from "@/components/ui/SectionTitle";
+import {
+  Commander,
+  Order,
+  commanders as mockCommanders,
+  fleets as mockFleets,
+  planets as mockPlanets,
+  relics as mockRelics,
+  strategicOrders as mockStrategicOrders
+} from "@/data/campaignData";
+import { FastForward, HelpCircle, Pause, Play, Rewind, RotateCcw, Search, ShieldAlert } from "lucide-react";
+import React, { useMemo, useState } from "react";
 
-// Type definitions
-interface Commander {
-  id: string;
+// Reusable CommanderPortrait Component
+type CommanderPortraitProps = {
+  src?: string;
+  alt: string;
   name: string;
-  title: string;
-  legion: string;
-  allegiance: "Imperium" | "Chaos" | "Traitor" | "Unknown";
-  status: string;
-  sector: string;
-  specialty: string;
-  loyalty: string;
-  aura: string;
-  threatLevel: string;
-  currentOrder: string;
-  stats: {
-    commandPower: number;
-    fleetControl: number;
-    warpResistance: number;
-    corruptionRisk: number;
-    moraleImpact: number;
+  allegiance: string;
+  status?: string;
+  size?: "sm" | "md" | "lg";
+  priority?: boolean;
+};
+
+export function CommanderPortrait({
+  src,
+  alt,
+  name,
+  allegiance,
+  status,
+  size = "md",
+  priority = false
+}: CommanderPortraitProps) {
+  const [imageError, setImageError] = useState(false);
+
+  const getInitials = (n: string) => {
+    return n
+      .split(" ")
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((part) => part[0])
+      .join("")
+      .toUpperCase();
   };
-}
 
-interface Planet {
-  id: string;
-  name: string;
-  type: string;
-  controllingFaction: "Imperium" | "Chaos" | "Contested" | "Adeptus Mechanicus";
-  status: string;
-  threatLevel: "Low" | "Medium" | "High" | "Extreme" | "Exterminatus Risk";
-  corruptionLevel: number;
-  siegeStatus: string;
-  exterminatusRisk: "None" | "Low" | "Under Review" | "Extreme";
-  assignedCommanderId: string;
-  x: number; // percentage coordinate
-  y: number;
-  color: string;
-  size: number;
-}
+  const isFallen = status && (status.toLowerCase().includes("fallen") || status.toLowerCase().includes("memorial"));
 
-interface Order {
-  id: string;
-  title: string;
-  faction: string;
-  status: string;
-  priority: "High" | "Extreme";
-  progress: number;
-  assignedCommanderId: string;
-  target: string; // target name
-}
+  // size mapping
+  let sizeClasses = "w-10 h-10";
+  if (size === "sm") sizeClasses = "w-8 h-8 rounded-full border-2";
+  else if (size === "md") sizeClasses = "w-11 h-11 rounded-lg border";
+  else if (size === "lg") sizeClasses = "w-24 h-32 rounded-lg border-2 aspect-[3/4]";
 
-interface Fleet {
-  id: string;
-  name: string;
-  ships: number;
-  status: string;
-  x: number;
-  y: number;
-  color: string;
-}
+  // border colors & glows based on allegiance
+  let borderClass = "border-slate-800/80";
+  if (allegiance === "Imperium") {
+    borderClass = "border-yellow-600/60 shadow-[0_0_8px_rgba(250,204,21,0.25)]";
+  } else if (allegiance === "Chaos" || allegiance === "Traitor") {
+    borderClass = "border-red-600/60 shadow-[0_0_8px_rgba(239,68,68,0.25)]";
+  } else if (allegiance === "Unknown") {
+    borderClass = "border-cyan-500/60 shadow-[0_0_8px_rgba(34,211,238,0.25)]";
+  }
 
-interface Relic {
-  id: string;
-  label: string;
-  type: "Archeotech Signal" | "Lost Beacon" | "Forbidden Archive";
-  x: number;
-  y: number;
+  const initials = getInitials(name);
+  const filterClass = isFallen ? "grayscale contrast-[0.85] opacity-60" : "";
+
+  // animation trigger for large views
+  const animationClass = (allegiance === "Chaos" || allegiance === "Traitor") && size === "lg"
+    ? "animate-[chaosPortraitFlicker_3s_infinite]"
+    : (allegiance === "Imperium" && size === "lg" ? "animate-[imperialPortraitGlow_4s_infinite]" : "");
+
+  return (
+    <div className={`relative overflow-hidden bg-black/90 flex items-center justify-center shrink-0 ${sizeClasses} ${borderClass} ${filterClass} ${animationClass}`}>
+      {/* Scanline overlay */}
+      {(size === "md" || size === "lg") && (
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(18,24,38,0)_50%,rgba(0,0,0,0.25)_50%)] bg-[size:100%_4px] pointer-events-none opacity-20 z-10" />
+      )}
+
+      {imageError || !src ? (
+        <div className="flex items-center justify-center w-full h-full text-center">
+          <span className={`font-display font-black tracking-wider ${size === "sm" ? "text-[9px]" : size === "md" ? "text-xs" : "text-xl"
+            } ${allegiance === "Chaos" || allegiance === "Traitor" ? "text-red-500" :
+              allegiance === "Imperium" ? "text-yellow-500" : "text-cyan-400"
+            }`}>
+            {initials}
+          </span>
+        </div>
+      ) : (
+        <img
+          src={src}
+          alt={alt}
+          onError={() => setImageError(true)}
+          loading={priority ? "eager" : "lazy"}
+          className="w-full h-full object-cover relative z-0"
+        />
+      )}
+
+      {/* Memorial Overlay label */}
+      {isFallen && (size === "lg" || size === "md") && (
+        <div className="absolute bottom-0 left-0 right-0 bg-red-950/80 border-t border-red-900/40 py-0.5 text-center z-10 pointer-events-none">
+          <span className="text-[6px] font-display font-black text-red-400 tracking-widest block uppercase">
+            MEMORIAM
+          </span>
+        </div>
+      )}
+    </div>
+  );
 }
 
 export function SpaceScene() {
   const [isPlaying, setIsPlaying] = useState<boolean>(true);
   const [timeSpeed, setTimeSpeed] = useState<number>(1.0);
-  
+
   // Selection states
   const [selectedPlanetId, setSelectedPlanetId] = useState<string>("voss");
   const [selectedCommanderId, setSelectedCommanderId] = useState<string | null>(null);
@@ -86,480 +122,12 @@ export function SpaceScene() {
   const [rosterSearch, setRosterSearch] = useState<string>("");
   const [showTactical, setShowTactical] = useState<boolean>(true);
 
-  // Warhammer 40K Commanders Data
-  const commanders: Commander[] = useMemo(() => [
-    {
-      id: "primarch-01",
-      name: "Roboute Guilliman",
-      title: "Lord Commander of the Imperium",
-      legion: "Ultramarines",
-      allegiance: "Imperium",
-      status: "Active",
-      sector: "Segmentum Solar",
-      specialty: "Strategic Command",
-      loyalty: "Absolute",
-      aura: "blue-gold",
-      threatLevel: "Controlled",
-      currentOrder: "Coordinate Imperial defense lines across multiple sectors.",
-      stats: { commandPower: 98, fleetControl: 95, warpResistance: 78, corruptionRisk: 2, moraleImpact: 96 }
-    },
-    {
-      id: "primarch-02",
-      name: "Lion El'Jonson",
-      title: "Primarch of the Dark Angels",
-      legion: "Dark Angels",
-      allegiance: "Imperium",
-      status: "Active",
-      sector: "Imperium Nihilus",
-      specialty: "Hunter-Killer Campaigns",
-      loyalty: "Absolute",
-      aura: "forest-green-gold",
-      threatLevel: "High",
-      currentOrder: "Eliminate traitor fleets near the warp corridor.",
-      stats: { commandPower: 92, fleetControl: 88, warpResistance: 90, corruptionRisk: 5, moraleImpact: 85 }
-    },
-    {
-      id: "primarch-03",
-      name: "Sanguinius",
-      title: "Great Angel",
-      legion: "Blood Angels",
-      allegiance: "Imperium",
-      status: "Honored Memory",
-      sector: "Terra Prime",
-      specialty: "Icon of Sacrifice",
-      loyalty: "Eternal",
-      aura: "gold-red",
-      threatLevel: "Sacred",
-      currentOrder: "Inspire nearby Imperial forces with legacy aura.",
-      stats: { commandPower: 95, fleetControl: 80, warpResistance: 95, corruptionRisk: 0, moraleImpact: 100 }
-    },
-    {
-      id: "primarch-04",
-      name: "Leman Russ",
-      title: "Wolf King",
-      legion: "Space Wolves",
-      allegiance: "Imperium",
-      status: "Missing",
-      sector: "Fenrisian Expanse",
-      specialty: "Shock Assault",
-      loyalty: "Legendary",
-      aura: "ice-blue",
-      threatLevel: "Unknown",
-      currentOrder: "Awaiting return signal from deep void.",
-      stats: { commandPower: 88, fleetControl: 75, warpResistance: 85, corruptionRisk: 8, moraleImpact: 90 }
-    },
-    {
-      id: "primarch-05",
-      name: "Rogal Dorn",
-      title: "Praetorian of Terra",
-      legion: "Imperial Fists",
-      allegiance: "Imperium",
-      status: "Presumed Fallen",
-      sector: "Terra Defense Grid",
-      specialty: "Fortification",
-      loyalty: "Absolute",
-      aura: "yellow-gold",
-      threatLevel: "Fortified",
-      currentOrder: "Maintain orbital bastion protocols.",
-      stats: { commandPower: 90, fleetControl: 85, warpResistance: 80, corruptionRisk: 1, moraleImpact: 92 }
-    },
-    {
-      id: "primarch-06",
-      name: "Vulkan",
-      title: "The Perpetual",
-      legion: "Salamanders",
-      allegiance: "Imperium",
-      status: "Missing",
-      sector: "Nocturne Gate",
-      specialty: "Relic Forging",
-      loyalty: "Unbreakable",
-      aura: "green-fire",
-      threatLevel: "Stable",
-      currentOrder: "Recover ancient forge relics.",
-      stats: { commandPower: 86, fleetControl: 70, warpResistance: 88, corruptionRisk: 2, moraleImpact: 89 }
-    },
-    {
-      id: "primarch-07",
-      name: "Jaghatai Khan",
-      title: "Great Khan",
-      legion: "White Scars",
-      allegiance: "Imperium",
-      status: "Missing",
-      sector: "Webway Fringe",
-      specialty: "Rapid Strike",
-      loyalty: "Free but Loyal",
-      aura: "white-red",
-      threatLevel: "Mobile",
-      currentOrder: "Conduct high-speed void raids.",
-      stats: { commandPower: 85, fleetControl: 80, warpResistance: 76, corruptionRisk: 10, moraleImpact: 87 }
-    },
-    {
-      id: "primarch-08",
-      name: "Corvus Corax",
-      title: "Shadowed Primarch",
-      legion: "Raven Guard",
-      allegiance: "Imperium",
-      status: "Unknown",
-      sector: "Eye of Terror Fringe",
-      specialty: "Stealth Warfare",
-      loyalty: "Vengeful",
-      aura: "shadow-purple",
-      threatLevel: "Classified",
-      currentOrder: "Hunt traitor entities in the warp.",
-      stats: { commandPower: 87, fleetControl: 74, warpResistance: 86, corruptionRisk: 15, moraleImpact: 80 }
-    },
-    {
-      id: "primarch-09",
-      name: "Ferrus Manus",
-      title: "The Gorgon",
-      legion: "Iron Hands",
-      allegiance: "Imperium",
-      status: "Fallen",
-      sector: "Medusan Archive",
-      specialty: "Machine Warfare",
-      loyalty: "Eternal",
-      aura: "steel-cyan",
-      threatLevel: "Memorial",
-      currentOrder: "Boost Iron Hands machine doctrine.",
-      stats: { commandPower: 82, fleetControl: 80, warpResistance: 70, corruptionRisk: 5, moraleImpact: 78 }
-    },
-    {
-      id: "traitor-01",
-      name: "Horus Lupercal",
-      title: "The Warmaster",
-      legion: "Sons of Horus",
-      allegiance: "Traitor",
-      status: "Fallen",
-      sector: "Heresy Echo",
-      specialty: "Total War",
-      loyalty: "Corrupted",
-      aura: "black-red",
-      threatLevel: "Mythic",
-      currentOrder: "Manifest as historical threat simulation.",
-      stats: { commandPower: 99, fleetControl: 98, warpResistance: 12, corruptionRisk: 100, moraleImpact: 95 }
-    },
-    {
-      id: "traitor-02",
-      name: "Abaddon the Despoiler",
-      title: "Warmaster of Chaos",
-      legion: "Black Legion",
-      allegiance: "Chaos",
-      status: "Active",
-      sector: "Eye of Terror",
-      specialty: "Black Crusade",
-      loyalty: "Chaos Undivided",
-      aura: "black-gold-red",
-      threatLevel: "Extreme",
-      currentOrder: "Launch Black Crusade pressure against Imperial sectors.",
-      stats: { commandPower: 97, fleetControl: 94, warpResistance: 25, corruptionRisk: 95, moraleImpact: 90 }
-    },
-    {
-      id: "traitor-03",
-      name: "Magnus the Red",
-      title: "Daemon Primarch of Tzeentch",
-      legion: "Thousand Sons",
-      allegiance: "Chaos",
-      status: "Active",
-      sector: "Prospero Rift",
-      specialty: "Sorcery / Warp Manipulation",
-      loyalty: "Tzeentch",
-      aura: "crimson-purple",
-      threatLevel: "Extreme",
-      currentOrder: "Destabilize Astronomican signal with warp sorcery.",
-      stats: { commandPower: 94, fleetControl: 70, warpResistance: 10, corruptionRisk: 98, moraleImpact: 85 }
-    },
-    {
-      id: "traitor-04",
-      name: "Mortarion",
-      title: "Daemon Primarch of Nurgle",
-      legion: "Death Guard",
-      allegiance: "Chaos",
-      status: "Active",
-      sector: "Plague Zone",
-      specialty: "Attrition Warfare",
-      loyalty: "Nurgle",
-      aura: "sickly-green",
-      threatLevel: "Extreme",
-      currentOrder: "Spread plague corruption across contested worlds.",
-      stats: { commandPower: 90, fleetControl: 78, warpResistance: 22, corruptionRisk: 99, moraleImpact: 80 }
-    },
-    {
-      id: "traitor-05",
-      name: "Angron",
-      title: "Daemon Primarch of Khorne",
-      legion: "World Eaters",
-      allegiance: "Chaos",
-      status: "Active",
-      sector: "Blood Rift",
-      specialty: "Berserker Assault",
-      loyalty: "Khorne",
-      aura: "blood-red",
-      threatLevel: "Catastrophic",
-      currentOrder: "Break Imperial siege lines through direct assault.",
-      stats: { commandPower: 92, fleetControl: 60, warpResistance: 5, corruptionRisk: 100, moraleImpact: 92 }
-    },
-    {
-      id: "traitor-06",
-      name: "Fulgrim",
-      title: "Daemon Primarch of Slaanesh",
-      legion: "Emperor's Children",
-      allegiance: "Chaos",
-      status: "Active",
-      sector: "Excess Veil",
-      specialty: "Perfection / Corruption",
-      loyalty: "Slaanesh",
-      aura: "pink-purple",
-      threatLevel: "High",
-      currentOrder: "Corrupt noble houses and command channels.",
-      stats: { commandPower: 88, fleetControl: 75, warpResistance: 15, corruptionRisk: 96, moraleImpact: 84 }
-    },
-    {
-      id: "traitor-07",
-      name: "Perturabo",
-      title: "Daemon Primarch of the Iron Warriors",
-      legion: "Iron Warriors",
-      allegiance: "Chaos",
-      status: "Active",
-      sector: "Iron Cage Front",
-      specialty: "Siege Warfare",
-      loyalty: "Chaos Undivided",
-      aura: "iron-orange",
-      threatLevel: "Extreme",
-      currentOrder: "Conduct planetary siege and fortress breach operations.",
-      stats: { commandPower: 91, fleetControl: 85, warpResistance: 30, corruptionRisk: 90, moraleImpact: 82 }
-    },
-    {
-      id: "traitor-08",
-      name: "Lorgar Aurelian",
-      title: "Bearer of the Word",
-      legion: "Word Bearers",
-      allegiance: "Chaos",
-      status: "Active / Hidden",
-      sector: "Dark Creed Nebula",
-      specialty: "Cult Corruption",
-      loyalty: "Chaos Undivided",
-      aura: "dark-red-purple",
-      threatLevel: "High",
-      currentOrder: "Seed cult uprisings across hive worlds.",
-      stats: { commandPower: 86, fleetControl: 65, warpResistance: 20, corruptionRisk: 92, moraleImpact: 88 }
-    },
-    {
-      id: "traitor-09",
-      name: "Konrad Curze",
-      title: "Night Haunter",
-      legion: "Night Lords",
-      allegiance: "Traitor",
-      status: "Fallen",
-      sector: "Nostramo Echo",
-      specialty: "Terror Warfare",
-      loyalty: "None",
-      aura: "midnight-blue",
-      threatLevel: "Legacy Terror",
-      currentOrder: "Manifest fear effect in historical simulation.",
-      stats: { commandPower: 83, fleetControl: 58, warpResistance: 40, corruptionRisk: 80, moraleImpact: 75 }
-    },
-    {
-      id: "traitor-10",
-      name: "Alpharius Omegon",
-      title: "The Hydra",
-      legion: "Alpha Legion",
-      allegiance: "Unknown",
-      status: "Unknown",
-      sector: "Classified",
-      specialty: "Infiltration / Deception",
-      loyalty: "Unknown",
-      aura: "teal-green",
-      threatLevel: "Unclear",
-      currentOrder: "Obfuscate command intelligence.",
-      stats: { commandPower: 85, fleetControl: 82, warpResistance: 60, corruptionRisk: 45, moraleImpact: 80 }
-    }
-  ], []);
-
-  // Planets Data with controllingFaction & assigned commanders
-  const planets: Planet[] = useMemo(() => [
-    {
-      id: "terra",
-      name: "Terra Prime",
-      type: "Throne World",
-      controllingFaction: "Imperium",
-      status: "Fortified",
-      threatLevel: "High",
-      corruptionLevel: 3,
-      siegeStatus: "Orbital Defense Active",
-      exterminatusRisk: "None",
-      assignedCommanderId: "primarch-01",
-      x: 52,
-      y: 28,
-      color: "from-blue-700 to-slate-900 border-yellow-500/40",
-      size: 56
-    },
-    {
-      id: "voss",
-      name: "Voss-IX",
-      type: "Forge World",
-      controllingFaction: "Contested",
-      status: "Under Siege",
-      threatLevel: "Extreme",
-      corruptionLevel: 44,
-      siegeStatus: "Chaos Fleet Engaged",
-      exterminatusRisk: "Under Review",
-      assignedCommanderId: "traitor-07",
-      x: 24,
-      y: 52,
-      color: "from-red-800 to-zinc-950 border-red-500/40",
-      size: 48
-    },
-    {
-      id: "nocturne",
-      name: "Nocturne Gate",
-      type: "Death World",
-      controllingFaction: "Imperium",
-      status: "Warp Distortion",
-      threatLevel: "High",
-      corruptionLevel: 18,
-      siegeStatus: "Signal Unstable",
-      exterminatusRisk: "Low",
-      assignedCommanderId: "primarch-06",
-      x: 78,
-      y: 66,
-      color: "from-purple-900 to-indigo-950 border-purple-500/40",
-      size: 42
-    },
-    {
-      id: "prospero",
-      name: "Prospero Rift",
-      type: "Warp-Touched World",
-      controllingFaction: "Chaos",
-      status: "Sorcerous Distortion",
-      threatLevel: "Extreme",
-      corruptionLevel: 91,
-      siegeStatus: "Warp Breach",
-      exterminatusRisk: "Extreme",
-      assignedCommanderId: "traitor-03",
-      x: 82,
-      y: 22,
-      color: "from-purple-950 to-pink-950 border-pink-500/40",
-      size: 44
-    }
-  ], []);
-
-  // Strategic Orders Data
-  const strategicOrders: Order[] = useMemo(() => [
-    {
-      id: "order-01",
-      title: "Secure Terra Prime Orbit",
-      faction: "Imperium",
-      status: "Active",
-      priority: "High",
-      progress: 68,
-      assignedCommanderId: "primarch-01",
-      target: "Terra Prime",
-    },
-    {
-      id: "order-02",
-      title: "Stabilize the Astronomican",
-      faction: "Imperium",
-      status: "Critical",
-      priority: "Extreme",
-      progress: 41,
-      assignedCommanderId: "primarch-01",
-      target: "Golden Throne",
-    },
-    {
-      id: "order-03",
-      title: "Repel Black Crusade Fleet",
-      faction: "Imperium",
-      status: "Active",
-      priority: "Extreme",
-      progress: 36,
-      assignedCommanderId: "primarch-02",
-      target: "Terra Prime",
-    },
-    {
-      id: "order-04",
-      title: "Contain Warp Storm",
-      faction: "Inquisition",
-      status: "Critical",
-      priority: "Extreme",
-      progress: 28,
-      assignedCommanderId: "traitor-03",
-      target: "Prospero Rift",
-    },
-    {
-      id: "order-05",
-      title: "Authorize Exterminatus Review",
-      faction: "Inquisition",
-      status: "Pending",
-      priority: "High",
-      progress: 12,
-      assignedCommanderId: "primarch-05",
-      target: "Voss-IX",
-    },
-    {
-      id: "order-06",
-      title: "Recover STC Relic Fragment",
-      faction: "Adeptus Mechanicus",
-      status: "Active",
-      priority: "High",
-      progress: 52,
-      assignedCommanderId: "primarch-06",
-      target: "Nocturne Gate",
-    }
-  ], []);
-
-  const fleets: Fleet[] = useMemo(() => [
-    {
-      id: "fleet-alpha",
-      name: "Iron Vanguard Crusade",
-      ships: 12,
-      status: "Orbital Blockade",
-      x: 16,
-      y: 44,
-      color: "text-amber-500 border-amber-500/30"
-    },
-    {
-      id: "fleet-beta",
-      name: "Chaos Despoiler Pack",
-      ships: 9,
-      status: "Engaged",
-      x: 32,
-      y: 58,
-      color: "text-red-500 border-red-500/30"
-    },
-    {
-      id: "fleet-gamma",
-      name: "Ultramarine Spearhead",
-      ships: 6,
-      status: "Patrolling",
-      x: 58,
-      y: 18,
-      color: "text-cyan-500 border-cyan-500/30"
-    }
-  ], []);
-
-  const relics: Relic[] = useMemo(() => [
-    {
-      id: "relic-01",
-      label: "Ancient STC Fragment",
-      type: "Archeotech Signal",
-      x: 88,
-      y: 16
-    },
-    {
-      id: "relic-02",
-      label: "Dark Age Distress Beacon",
-      type: "Lost Beacon",
-      x: 12,
-      y: 76
-    },
-    {
-      id: "relic-03",
-      label: "Locked Vault Core",
-      type: "Forbidden Archive",
-      x: 48,
-      y: 86
-    }
-  ], []);
+  // Campaign Mock Data References
+  const commanders = mockCommanders;
+  const planets = mockPlanets;
+  const strategicOrders = mockStrategicOrders;
+  const fleets = mockFleets;
+  const relics = mockRelics;
 
   // Asteroid Belt elements
   const beltAsteroids = useMemo(() => {
@@ -593,8 +161,8 @@ export function SpaceScene() {
   const filteredCommanders = useMemo(() => {
     return commanders.filter((c) => {
       const matchesSearch = c.name.toLowerCase().includes(rosterSearch.toLowerCase()) ||
-                            c.legion.toLowerCase().includes(rosterSearch.toLowerCase()) ||
-                            c.title.toLowerCase().includes(rosterSearch.toLowerCase());
+        c.legion.toLowerCase().includes(rosterSearch.toLowerCase()) ||
+        c.title.toLowerCase().includes(rosterSearch.toLowerCase());
       if (rosterAllegianceFilter === "All") return matchesSearch;
       return c.allegiance === rosterAllegianceFilter && matchesSearch;
     });
@@ -630,7 +198,7 @@ export function SpaceScene() {
   };
 
   const activeCommandersCount = useMemo(() => {
-    return commanders.filter((c) => c.allegiance === "Imperium" && c.status === "Active").length;
+    return commanders.filter((c) => c.allegiance === "Imperium" && c.status.includes("Active")).length;
   }, [commanders]);
 
   const chaosThreatsCount = useMemo(() => {
@@ -665,7 +233,8 @@ export function SpaceScene() {
   return (
     <div className="mx-auto max-w-7xl px-4 py-24 sm:px-6 relative" id="simulator">
       {/* Dynamic CSS animations block */}
-      <style dangerouslySetInnerHTML={{ __html: `
+      <style dangerouslySetInnerHTML={{
+        __html: `
         @keyframes spin-clockwise {
           from { transform: rotate(0deg); }
           to { transform: rotate(360deg); }
@@ -707,6 +276,32 @@ export function SpaceScene() {
           40% { transform: translate(2px, -2px); }
           60% { transform: translate(-1px, -1px); }
           80% { transform: translate(1px, 2px); }
+        }
+        @keyframes chaosPortraitFlicker {
+          0%, 100% {
+            opacity: 1;
+            filter: contrast(1.05) saturate(1.1);
+          }
+          45% {
+            opacity: 0.92;
+            filter: contrast(1.25) saturate(1.4) hue-rotate(8deg);
+          }
+          48% {
+            opacity: 0.75;
+            filter: contrast(1.5) saturate(1.8) hue-rotate(-12deg);
+          }
+          52% {
+            opacity: 1;
+            filter: contrast(1.1) saturate(1.2);
+          }
+        }
+        @keyframes imperialPortraitGlow {
+          0%, 100% {
+            box-shadow: 0 0 8px rgba(250, 204, 21, 0.25);
+          }
+          50% {
+            box-shadow: 0 0 16px rgba(34, 211, 238, 0.28);
+          }
         }
         
         .animate-spin-custom {
@@ -755,7 +350,7 @@ export function SpaceScene() {
 
       {/* Warhammer 40K Grimdark Cogitator Layout Grid */}
       <div className="grid gap-6 lg:grid-cols-12" style={dynamicStyle}>
-        
+
         {/* ==================================================
             LEFT COLUMN (Roster & Hierarchy, span 3)
             ================================================== */}
@@ -785,11 +380,10 @@ export function SpaceScene() {
                 <button
                   key={tab}
                   onClick={() => setRosterAllegianceFilter(tab)}
-                  className={`py-1 rounded text-[8px] font-display font-bold uppercase tracking-wider border transition-all cursor-pointer ${
-                    rosterAllegianceFilter === tab
-                      ? "border-amber-500 bg-amber-950/20 text-amber-400"
-                      : "border-white/5 bg-slate-900/40 text-slate-500 hover:text-slate-300"
-                  }`}
+                  className={`py-1 rounded text-[8px] font-display font-bold uppercase tracking-wider border transition-all cursor-pointer ${rosterAllegianceFilter === tab
+                    ? "border-amber-500 bg-amber-950/20 text-amber-400"
+                    : "border-white/5 bg-slate-900/40 text-slate-500 hover:text-slate-300"
+                    }`}
                 >
                   {tab}
                 </button>
@@ -812,10 +406,18 @@ export function SpaceScene() {
                     key={c.id}
                     onClick={() => handleCommanderSelect(c)}
                     onMouseEnter={() => setHighlightTarget(c.sector)}
-                    className={`p-2.5 rounded border cursor-pointer hover:border-amber-900/50 transition-all flex items-center justify-between ${activeGlow}`}
+                    className={`p-2 rounded border cursor-pointer hover:border-amber-900/50 transition-all flex items-center gap-2.5 ${activeGlow}`}
                   >
-                    <div>
-                      <h5 className="font-display text-[9px] font-bold text-slate-200 uppercase tracking-wide">
+                    <CommanderPortrait
+                      src={c.portrait}
+                      alt={c.portraitAlt}
+                      name={c.name}
+                      allegiance={c.allegiance}
+                      status={c.status}
+                      size="sm"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <h5 className="font-display text-[9px] font-bold text-slate-200 uppercase tracking-wide truncate">
                         {c.name}
                       </h5>
                       <p className="text-[7px] text-slate-500 font-body uppercase mt-0.5">
@@ -823,11 +425,10 @@ export function SpaceScene() {
                       </p>
                     </div>
 
-                    <span className={`text-[7px] font-display font-bold uppercase tracking-widest px-1.5 py-0.5 rounded border ${
-                      c.allegiance === "Chaos" ? "border-red-900/40 text-red-400 bg-red-950/10" :
+                    <span className={`text-[7px] font-display font-bold uppercase tracking-widest px-1.5 py-0.5 rounded border shrink-0 ${c.allegiance === "Chaos" ? "border-red-900/40 text-red-400 bg-red-950/10" :
                       c.allegiance === "Imperium" ? "border-amber-900/40 text-amber-500 bg-amber-950/10" :
-                      "border-cyan-900/40 text-cyan-400 bg-cyan-950/10"
-                    }`}>
+                        "border-cyan-900/40 text-cyan-400 bg-cyan-950/10"
+                      }`}>
                       {c.allegiance}
                     </span>
                   </div>
@@ -841,51 +442,72 @@ export function SpaceScene() {
             <h4 className="font-display text-[9px] font-black uppercase tracking-widest text-amber-500 pb-1.5 border-b border-amber-900/10">
               Command Hierarchy
             </h4>
-            
-            <div className="relative h-[180px] overflow-hidden bg-black/40 rounded-lg p-2 flex flex-col justify-between font-display text-[7px] tracking-widest uppercase">
+
+            <div className="relative h-[190px] overflow-hidden bg-black/40 rounded-lg p-2 flex flex-col justify-between font-display text-[7px] tracking-widest uppercase">
               {/* Emperor Node */}
-              <div className="flex justify-center">
+              <div className="flex justify-center z-10">
                 <div
                   onClick={() => {
                     setSelectedCommanderId(null);
                     setHighlightTarget("Golden Throne");
                   }}
-                  className="px-2 py-1 border border-yellow-500/40 bg-yellow-950/10 text-yellow-400 rounded cursor-pointer hover:border-yellow-400 transition-colors animate-pulse"
+                  className="px-2 py-1 border border-yellow-500/40 bg-yellow-950/10 text-yellow-400 rounded cursor-pointer hover:border-yellow-400 transition-colors animate-pulse flex items-center gap-1.5"
                 >
-                  👑 The Emperor
+                  <CommanderPortrait
+                    src="/warhammer/portraits/emperor-of-mankind.jpg"
+                    alt="The Emperor of Mankind"
+                    name="Emperor"
+                    allegiance="Imperium"
+                    size="sm"
+                  />
+                  <span>👑 The Emperor</span>
                 </div>
               </div>
 
               {/* Connecting Lines SVG */}
               <svg className="absolute inset-0 w-full h-full pointer-events-none opacity-20">
-                <line x1="50%" y1="20" x2="50%" y2="55" stroke="#facc15" strokeWidth="1" strokeDasharray="3 3" />
-                <line x1="50%" y1="75" x2="50%" y2="105" stroke="#facc15" strokeWidth="1" strokeDasharray="3 3" />
-                <line x1="50%" y1="75" x2="20%" y2="105" stroke="#7e22ce" strokeWidth="1" strokeDasharray="2 3" />
-                <line x1="50%" y1="75" x2="80%" y2="105" stroke="#facc15" strokeWidth="1" strokeDasharray="3 3" />
+                <line x1="50%" y1="20" x2="50%" y2="60" stroke="#facc15" strokeWidth="1" strokeDasharray="3 3" />
+                <line x1="50%" y1="85" x2="50%" y2="120" stroke="#facc15" strokeWidth="1" strokeDasharray="3 3" />
+                <line x1="50%" y1="85" x2="20%" y2="120" stroke="#7e22ce" strokeWidth="1" strokeDasharray="2 3" />
+                <line x1="50%" y1="85" x2="80%" y2="120" stroke="#facc15" strokeWidth="1" strokeDasharray="3 3" />
               </svg>
 
               {/* High Lords Node */}
-              <div className="flex justify-center">
+              <div className="flex justify-center z-10">
                 <div className="px-2 py-0.5 border border-amber-900/30 bg-slate-900 text-slate-400 rounded">
                   High Lords of Terra
                 </div>
               </div>
 
               {/* Lower Tier Nodes */}
-              <div className="flex justify-between px-1">
+              <div className="flex justify-between px-1 z-10">
                 {/* Chaos heresy line */}
-                <div 
+                <div
                   onClick={() => handleCommanderSelect(commanders.find(c => c.id === "traitor-03")!)}
-                  className="px-1.5 py-0.5 border border-purple-500/30 bg-purple-950/10 text-purple-400 rounded cursor-pointer"
+                  className="px-1.5 py-0.5 border border-purple-500/30 bg-purple-950/10 text-purple-400 rounded cursor-pointer flex items-center gap-1 hover:border-purple-400 transition-colors"
                 >
-                  ⚡ Daemon Primarchs
+                  <CommanderPortrait
+                    src="/warhammer/portraits/magnus-the-red.jpg"
+                    alt="Magnus the Red"
+                    name="Magnus Red"
+                    allegiance="Chaos"
+                    size="sm"
+                  />
+                  <span>⚡ Daemon Primarchs</span>
                 </div>
 
-                <div 
+                <div
                   onClick={() => handleCommanderSelect(commanders[0])}
-                  className="px-1.5 py-0.5 border border-yellow-500/40 bg-yellow-950/10 text-yellow-400 rounded cursor-pointer"
+                  className="px-1.5 py-0.5 border-2 border-yellow-500 bg-yellow-950/20 text-yellow-300 rounded cursor-pointer flex items-center gap-1 shadow-[0_0_12px_rgba(250,204,21,0.4)] animate-pulse"
                 >
-                  ⚔️ Lord Commander
+                  <CommanderPortrait
+                    src="/warhammer/portraits/roboute-guilliman.jpg"
+                    alt="Roboute Guilliman"
+                    name="Roboute Guilliman"
+                    allegiance="Imperium"
+                    size="sm"
+                  />
+                  <span>⚔️ Lord Commander</span>
                 </div>
 
                 <div className="px-1.5 py-0.5 border border-cyan-900/40 bg-slate-900 text-cyan-400 rounded">
@@ -903,22 +525,22 @@ export function SpaceScene() {
           {/* Viewport Frame */}
           <div className="relative w-full h-[520px] border-2 border-amber-900/50 bg-[#020204] overflow-hidden rounded-xl shadow-2xl">
             {/* Scanline pattern overlay */}
-            <div className="absolute inset-0 opacity-15 pointer-events-none bg-[linear-gradient(to_right,rgba(180,83,9,0.08)_1px,transparent_1px),linear-gradient(to_bottom,rgba(180,83,9,0.08)_1px,transparent_1px)] bg-[size:28px_28px]" />
+            <div className="absolute inset-0 opacity-15 pointer-events-none bg-[linear-gradient(to_right,rgba(18,24,38,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(to_bottom,rgba(18,24,38,0)_50%,rgba(0,0,0,0.25)_50%)] bg-[size:28px_28px]" />
 
             {/* EmperorCore Component (Golden Throne, Top Center) */}
-            <div 
+            <div
               className="absolute left-1/2 top-[13%] -translate-x-1/2 -translate-y-1/2 flex flex-col items-center group/emperor"
             >
               {/* Highlight selector halo */}
               {highlightTarget === "Golden Throne" && (
                 <div className="absolute -inset-4 rounded-full border border-yellow-500/30 animate-ping" />
               )}
-              
+
               {/* Astronomican beacon psychic circles */}
               <div className="absolute w-24 h-24 rounded-full animate-psychic-halo pointer-events-none" />
 
               {/* The Throne Silhouette */}
-              <div 
+              <div
                 onClick={() => {
                   setSelectedCommanderId(null);
                   setSelectedOrderId("order-02");
@@ -926,12 +548,23 @@ export function SpaceScene() {
                 }}
                 className="relative flex items-center justify-center p-1.5 rounded-full bg-slate-950/80 border border-yellow-500/40 shadow-[0_0_20px_rgba(250,204,21,0.25)] hover:border-yellow-400 transition-all cursor-pointer"
               >
-                <svg className="w-12 h-14 text-yellow-500 fill-current hover:text-yellow-400 transition-colors" viewBox="0 0 100 120">
-                  <path d="M 20 120 L 20 40 Q 50 10 80 40 L 80 120 Z" fill="rgba(180, 83, 9, 0.25)" stroke="currentColor" strokeWidth="2.5"/>
-                  <circle cx="50" cy="52" r="9" fill="currentColor"/>
-                  <path d="M 38 120 C 38 82, 62 82, 62 120 Z" fill="currentColor"/>
+                {/* Emperor Portrait Circle inside the Throne */}
+                <div className="absolute inset-1 rounded-full overflow-hidden border border-yellow-500/20 w-[44px] h-[44px] z-10 opacity-70 group-hover/emperor:opacity-90 transition-opacity">
+                  <CommanderPortrait
+                    src="/warhammer/portraits/emperor-of-mankind.jpg"
+                    alt="The Emperor of Mankind"
+                    name="Emperor"
+                    allegiance="Imperium"
+                    size="sm"
+                  />
+                </div>
+
+                <svg className="w-12 h-14 text-yellow-500 fill-current hover:text-yellow-400 transition-colors opacity-30 relative z-0" viewBox="0 0 100 120">
+                  <path d="M 20 120 L 20 40 Q 50 10 80 40 L 80 120 Z" fill="rgba(180, 83, 9, 0.25)" stroke="currentColor" strokeWidth="2.5" />
+                  <circle cx="50" cy="52" r="9" fill="currentColor" />
+                  <path d="M 38 120 C 38 82, 62 82, 62 120 Z" fill="currentColor" />
                   <path d="M 44 42 L 50 35 L 56 42 Z" fill="#ffffff" />
-                  <rect x="15" y="114" width="70" height="6" rx="2" fill="currentColor"/>
+                  <rect x="15" y="114" width="70" height="6" rx="2" fill="currentColor" />
                 </svg>
               </div>
 
@@ -945,7 +578,7 @@ export function SpaceScene() {
             {planets.map((p) => {
               const isSelected = selectedPlanetId === p.id;
               const isHighlighted = highlightTarget === p.name;
-              
+
               return (
                 <div
                   key={p.id}
@@ -967,9 +600,8 @@ export function SpaceScene() {
                       setSelectedPlanetId(p.id);
                       setHighlightTarget(p.name);
                     }}
-                    className={`relative rounded-full bg-gradient-to-br ${p.color} flex items-center justify-center cursor-pointer transition-all border ${
-                      isSelected ? "scale-105 border-yellow-500 shadow-[0_0_18px_rgba(250,204,21,0.3)]" : "opacity-80 border-slate-700 hover:opacity-100"
-                    }`}
+                    className={`relative rounded-full bg-gradient-to-br ${p.color} flex items-center justify-center cursor-pointer transition-all border ${isSelected ? "scale-105 border-yellow-500 shadow-[0_0_18px_rgba(250,204,21,0.3)]" : "opacity-80 border-slate-700 hover:opacity-100"
+                      }`}
                     style={{ width: p.size, height: p.size }}
                   >
                     <div className="absolute inset-1.5 rounded-full border border-dashed border-white/10 animate-spin-custom-reverse" style={{ animationDuration: "35s" }} />
@@ -993,7 +625,7 @@ export function SpaceScene() {
                   <span className="mt-2 font-display text-[8px] font-bold text-slate-300 uppercase tracking-widest">
                     {p.name}
                   </span>
-                  
+
                   {p.exterminatusRisk === "Extreme" && (
                     <span className="text-[6px] font-display font-black text-red-500 tracking-widest bg-red-950/40 border border-red-900/60 px-1 rounded mt-0.5 animate-pulse">
                       EXTERMINATUS RISK
@@ -1003,7 +635,7 @@ export function SpaceScene() {
               );
             })}
 
-            {/*patrolling Gothic fleets */}
+            {/* patrolling Gothic fleets */}
             {fleets.map((fleet) => (
               <div
                 key={fleet.id}
@@ -1148,7 +780,7 @@ export function SpaceScene() {
             RIGHT COLUMN (Telemetry details & Orders, span 3)
             ================================================== */}
         <div className="lg:col-span-3 flex flex-col gap-4 max-h-[600px] overflow-y-auto pr-1">
-          {/* Main Imperial Telemetry statistics */}
+          {/* Main Imperial Telemetry statistics / ImperialCommandPanel */}
           <div className="rounded-xl border border-amber-900/30 bg-slate-950/90 p-4 shadow-lg flex flex-col relative overflow-hidden">
             {/* Scanline layer effect */}
             <div className="absolute inset-0 bg-[linear-gradient(rgba(18,24,38,0)_50%,rgba(0,0,0,0.25)_50%)] bg-[size:100%_4px] pointer-events-none opacity-40" />
@@ -1161,6 +793,28 @@ export function SpaceScene() {
                 <span className="text-cyan-400 text-[8px]">CONFIRMED</span>
               )}
             </h4>
+
+            {/* Thumbnail portrait block */}
+            <div className="flex gap-2.5 items-center mb-3 pb-3 border-b border-amber-900/10">
+              <CommanderPortrait
+                src={selectedCommander ? selectedCommander.portrait : "/warhammer/portraits/emperor-of-mankind.jpg"}
+                alt={selectedCommander ? selectedCommander.portraitAlt : "The Emperor of Mankind"}
+                name={selectedCommander ? selectedCommander.name : "Emperor"}
+                allegiance={selectedCommander ? selectedCommander.allegiance : "Imperium"}
+                size="md"
+              />
+              <div className="flex-1 min-w-0">
+                <span className="text-[6px] font-display font-black text-slate-500 tracking-widest block uppercase">
+                  COMMAND SIGNATURE
+                </span>
+                <span className="text-[9px] font-display font-bold text-slate-300 uppercase block truncate">
+                  {selectedCommander ? selectedCommander.name : "The Emperor of Mankind"}
+                </span>
+                <span className="text-[7px] font-body text-slate-400 uppercase block truncate">
+                  {selectedCommander ? selectedCommander.title : "Throne World Beacon"}
+                </span>
+              </div>
+            </div>
 
             {/* Stats */}
             <div className="space-y-2 font-display text-[8px] tracking-wider text-slate-400 uppercase">
@@ -1190,14 +844,33 @@ export function SpaceScene() {
 
             {selectedCommander ? (
               <div className={`flex flex-col gap-2 relative ${selectedCommander.allegiance === "Chaos" ? "glitch-active" : ""}`}>
-                <div className="pb-1.5 border-b border-amber-900/10 flex justify-between items-start">
-                  <div>
+                <div className="flex gap-2.5 items-start border-b border-amber-900/10 pb-2.5">
+                  <CommanderPortrait
+                    src={selectedCommander.portrait}
+                    alt={selectedCommander.portraitAlt}
+                    name={selectedCommander.name}
+                    allegiance={selectedCommander.allegiance}
+                    status={selectedCommander.status}
+                    size="lg"
+                    priority={true}
+                  />
+                  <div className="flex-1 min-w-0">
                     <h4 className="font-display text-[10px] font-black text-starlight-white uppercase tracking-wider">
                       {selectedCommander.name}
                     </h4>
                     <p className="text-[7px] text-slate-500 font-body uppercase mt-0.5">
                       {selectedCommander.title}
                     </p>
+
+                    {/* Status indicator badges */}
+                    <div className="mt-1.5 flex flex-wrap gap-1">
+                      <span className={`text-[6px] font-display font-black px-1.5 py-0.5 rounded tracking-widest uppercase border ${selectedCommander.status.toLowerCase().includes("active") ? "border-emerald-900/40 text-emerald-400 bg-emerald-950/15" :
+                          selectedCommander.status.toLowerCase().includes("missing") ? "border-amber-900/40 text-amber-500 bg-amber-950/15 animate-pulse" :
+                            "border-slate-800 text-slate-400 bg-slate-900/40"
+                        }`}>
+                        {selectedCommander.status}
+                      </span>
+                    </div>
                   </div>
                 </div>
 
@@ -1320,9 +993,8 @@ export function SpaceScene() {
                       <h5 className="font-display text-[9px] font-bold text-slate-300 uppercase tracking-wide leading-tight">
                         {order.title}
                       </h5>
-                      <span className={`text-[6px] font-display font-black px-1 rounded uppercase tracking-wider ${
-                        order.priority === "Extreme" ? "text-red-500 bg-red-950/20" : "text-amber-500 bg-amber-950/20"
-                      }`}>
+                      <span className={`text-[6px] font-display font-black px-1 rounded uppercase tracking-wider ${order.priority === "Extreme" ? "text-red-500 bg-red-950/20" : "text-amber-500 bg-amber-950/20"
+                        }`}>
                         {order.priority}
                       </span>
                     </div>
@@ -1430,14 +1102,13 @@ export function SpaceScene() {
             >
               <Rewind className="h-4 w-4" />
             </button>
-            
+
             <button
               onClick={() => setIsPlaying(!isPlaying)}
-              className={`flex h-10 px-5 items-center gap-2 rounded-xl font-display text-xs font-bold uppercase tracking-wider transition-all cursor-pointer active:scale-95 ${
-                isPlaying 
-                  ? "bg-red-950/25 border border-red-500/30 text-red-500 hover:bg-red-950/40" 
-                  : "bg-amber-500/15 border border-amber-500/30 text-amber-500 hover:bg-amber-500/25 shadow-[0_0_12px_rgba(250,204,21,0.25)]"
-              }`}
+              className={`flex h-10 px-5 items-center gap-2 rounded-xl font-display text-xs font-bold uppercase tracking-wider transition-all cursor-pointer active:scale-95 ${isPlaying
+                ? "bg-red-950/25 border border-red-500/30 text-red-500 hover:bg-red-950/40"
+                : "bg-amber-500/15 border border-amber-500/30 text-amber-500 hover:bg-amber-500/25 shadow-[0_0_12px_rgba(250,204,21,0.25)]"
+                }`}
               aria-label={isPlaying ? "Pause simulation speed state" : "Play simulation speed state"}
             >
               {isPlaying ? <Pause className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5" />}
