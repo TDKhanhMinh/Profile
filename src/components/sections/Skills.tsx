@@ -30,9 +30,9 @@ export function Skills() {
     <div className="mx-auto max-w-6xl px-4 py-24 sm:px-6">
       <SectionTitle
         title="Kỹ năng"
-        subtitle="Các nhóm công nghệ đang sử dụng trong frontend, backend, database, cloud và IoT."
+        subtitle="Hệ thống công nghệ phân tích từ dữ liệu cảm biến đến giao diện người dùng."
       />
-      <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+      <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
         {skillGroups.map((group: SkillGroup, groupIndex) => {
           const Icon = iconMap[group.icon];
           const tone = toneForCategory(group.category);
@@ -40,21 +40,21 @@ export function Skills() {
           return (
             <motion.article
               key={group.category}
-              className="rounded-lg border border-border bg-surface/70 p-5"
+              className="group/card glass-panel glass-panel-hover p-6 rounded-2xl"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-80px" }}
               transition={{ duration: 0.45, delay: groupIndex * 0.05 }}
             >
-              <div className="mb-5 flex items-center gap-3">
-                <span className="inline-flex h-10 w-10 items-center justify-center rounded-md bg-accent/10 text-accent-light">
+              <div className="mb-6 flex items-center gap-3">
+                <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-accent/20 bg-accent/5 text-accent shadow-[0_0_12px_rgba(0,212,255,0.15)] group-hover/card:shadow-[0_0_20px_rgba(0,212,255,0.3)] transition-all duration-300">
                   <Icon className="h-5 w-5" />
                 </span>
-                <h3 className="font-display text-lg font-semibold text-foreground">
+                <h3 className="font-display text-base font-bold uppercase tracking-wider text-foreground group-hover/card:text-accent transition-colors duration-300">
                   {group.category}
                 </h3>
               </div>
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-2.5">
                 {group.skills.map((skill, skillIndex) => (
                   <motion.span
                     key={skill}

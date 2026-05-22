@@ -6,11 +6,18 @@ type SectionTitleProps = {
 export function SectionTitle({ title, subtitle }: SectionTitleProps) {
   return (
     <div className="mb-10 max-w-2xl">
-      <p className="mb-3 h-1 w-12 rounded-full bg-accent" aria-hidden="true" />
-      <h2 className="font-display text-3xl font-bold text-foreground sm:text-4xl">
+      <div 
+        className="mb-4 h-1 w-16 rounded-full bg-aurora-gradient glow-accent" 
+        aria-hidden="true" 
+      />
+      <h2 className="font-display text-3xl font-extrabold tracking-wider text-foreground sm:text-4xl uppercase">
         {title}
       </h2>
-      {subtitle ? <p className="mt-4 text-base leading-7 text-muted">{subtitle}</p> : null}
+      {subtitle ? (
+        <p className="mt-4 text-base font-normal leading-7 text-muted font-body">
+          {subtitle}
+        </p>
+      ) : null}
     </div>
   );
 }

@@ -1,17 +1,18 @@
 import type { Metadata } from "next";
-import { Inter, Sora } from "next/font/google";
+import { Orbitron, Space_Grotesk } from "next/font/google";
 import { Footer } from "@/components/layout/Footer";
 import { Navbar } from "@/components/layout/Navbar";
+import { CosmicBackground } from "@/components/ui/CosmicBackground";
 import "./globals.css";
 
-const sora = Sora({
+const orbitron = Orbitron({
   subsets: ["latin"],
-  variable: "--font-sora",
+  variable: "--font-orbitron",
 });
 
-const inter = Inter({
+const spaceGrotesk = Space_Grotesk({
   subsets: ["latin", "vietnamese"],
-  variable: "--font-inter",
+  variable: "--font-space-grotesk",
 });
 
 export const metadata: Metadata = {
@@ -53,10 +54,11 @@ export default function RootLayout({
   return (
     <html
       lang="vi"
-      className={`${sora.variable} ${inter.variable} h-full scroll-smooth antialiased`}
+      className={`${spaceGrotesk.variable} ${orbitron.variable} h-full scroll-smooth antialiased`}
     >
-      <body className="min-h-full bg-background text-foreground font-body">
-        <div className="flex min-h-screen flex-col">
+      <body className="min-h-full bg-background text-foreground font-body relative overflow-x-hidden">
+        <CosmicBackground />
+        <div className="relative z-10 flex min-h-screen flex-col">
           <Navbar />
           {children}
           <Footer />

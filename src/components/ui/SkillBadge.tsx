@@ -6,18 +6,18 @@ type SkillBadgeProps = {
 };
 
 const toneClasses: Record<NonNullable<SkillBadgeProps["tone"]>, string> = {
-  frontend: "border-sky-400/40 bg-sky-400/10 text-sky-100 hover:shadow-sky-400/20",
-  backend: "border-orange-400/40 bg-orange-400/10 text-orange-100 hover:shadow-orange-400/20",
-  database: "border-cyan-400/40 bg-cyan-400/10 text-cyan-100 hover:shadow-cyan-400/20",
-  cloud: "border-violet-400/40 bg-violet-400/10 text-violet-100 hover:shadow-violet-400/20",
-  iot: "border-accent/40 bg-accent/10 text-emerald-100 hover:shadow-accent/20",
+  frontend: "border-accent/30 bg-accent/5 text-accent hover:border-accent hover:shadow-[0_0_12px_rgba(0,212,255,0.3)]",
+  backend: "border-accent-dark/30 bg-accent-dark/5 text-accent-dark hover:border-accent-dark hover:shadow-[0_0_12px_rgba(124,58,237,0.3)]",
+  database: "border-sky-400/30 bg-sky-400/5 text-sky-400 hover:border-sky-400 hover:shadow-[0_0_12px_rgba(56,189,248,0.3)]",
+  cloud: "border-accent-light/30 bg-accent-light/5 text-accent-light hover:border-accent-light hover:shadow-[0_0_12px_rgba(168,85,247,0.3)]",
+  iot: "border-accent-pink/30 bg-accent-pink/5 text-accent-pink hover:border-accent-pink hover:shadow-[0_0_12px_rgba(236,72,153,0.3)]",
 };
 
 export function SkillBadge({ name, tone = "frontend" }: SkillBadgeProps) {
   return (
     <span
       className={cn(
-        "inline-flex rounded-full border px-3 py-1.5 text-sm font-medium shadow-lg shadow-transparent transition duration-200 hover:-translate-y-0.5 hover:scale-[1.02]",
+        "inline-flex rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-wider transition-all duration-300 cursor-default font-body",
         toneClasses[tone],
       )}
     >

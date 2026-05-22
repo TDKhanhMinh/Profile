@@ -8,10 +8,10 @@ import { projects, type Project } from "@/data/projects";
 import { cn } from "@/lib/utils";
 
 const filters: Array<{ label: string; value: "all" | Project["category"] }> = [
-  { label: "Tất cả", value: "all" },
-  { label: "IoT", value: "iot" },
-  { label: "Cloud", value: "cloud" },
-  { label: "Web", value: "web" },
+  { label: "Tất Cả", value: "all" },
+  { label: "IoT Systems", value: "iot" },
+  { label: "Cloud Space", value: "cloud" },
+  { label: "Web Apps", value: "web" },
 ];
 
 export function Projects() {
@@ -27,18 +27,18 @@ export function Projects() {
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-24 sm:px-6">
-      <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+      <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between mb-10">
         <SectionTitle
           title="Dự án"
-          subtitle="Những project tiêu biểu trong IoT, cloud và web application."
+          subtitle="Các cổng module và hạ tầng được thử nghiệm thành công."
         />
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-2.5">
           {filters.map((filter) => (
             <button
               key={filter.value}
               className={cn(
-                "h-10 rounded-md border border-border px-4 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent",
-                activeFilter === filter.value && "border-accent bg-accent/10 text-accent-light",
+                "h-10 rounded-xl border border-white/5 bg-white/5 px-5 text-xs font-bold uppercase tracking-wider font-display text-muted transition-all duration-300 hover:border-accent hover:text-accent hover:shadow-[0_0_12px_rgba(0,212,255,0.2)] active:scale-95 cursor-pointer",
+                activeFilter === filter.value && "border-accent bg-accent/10 text-accent shadow-[0_0_15px_rgba(0,212,255,0.2)]",
               )}
               type="button"
               onClick={() => setActiveFilter(filter.value)}
