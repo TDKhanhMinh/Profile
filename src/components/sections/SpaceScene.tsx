@@ -454,7 +454,7 @@ export function SpaceScene() {
                   className="px-2 py-1 border border-yellow-500/40 bg-yellow-950/10 text-yellow-400 rounded cursor-pointer hover:border-yellow-400 transition-colors animate-pulse flex items-center gap-1.5"
                 >
                   <CommanderPortrait
-                    src="/warhammer/portraits/emperor-of-mankind.jpg"
+                    src="https://warhammer40k.fandom.com/wiki/Emperor_of_Mankind"
                     alt="The Emperor of Mankind"
                     name="Emperor"
                     allegiance="Imperium"
@@ -551,7 +551,7 @@ export function SpaceScene() {
                 {/* Emperor Portrait Circle inside the Throne */}
                 <div className="absolute inset-1 rounded-full overflow-hidden border border-yellow-500/20 w-[44px] h-[44px] z-10 opacity-70 group-hover/emperor:opacity-90 transition-opacity">
                   <CommanderPortrait
-                    src="/warhammer/portraits/emperor-of-mankind.jpg"
+                    src="https://warhammer40k.fandom.com/wiki/Emperor_of_Mankind"
                     alt="The Emperor of Mankind"
                     name="Emperor"
                     allegiance="Imperium"
@@ -796,13 +796,30 @@ export function SpaceScene() {
 
             {/* Thumbnail portrait block */}
             <div className="flex gap-2.5 items-center mb-3 pb-3 border-b border-amber-900/10">
-              <CommanderPortrait
-                src={selectedCommander ? selectedCommander.portrait : "/warhammer/portraits/emperor-of-mankind.jpg"}
-                alt={selectedCommander ? selectedCommander.portraitAlt : "The Emperor of Mankind"}
-                name={selectedCommander ? selectedCommander.name : "Emperor"}
-                allegiance={selectedCommander ? selectedCommander.allegiance : "Imperium"}
-                size="md"
-              />
+              {(() => {
+                const portraitUrl = selectedCommander ? selectedCommander.portrait : "https://warhammer40k.fandom.com/wiki/Emperor_of_Mankind";
+                const isExternal = portraitUrl?.startsWith("http");
+                const inner = (
+                  <CommanderPortrait
+                    src={portraitUrl}
+                    alt={selectedCommander ? selectedCommander.portraitAlt : "The Emperor of Mankind"}
+                    name={selectedCommander ? selectedCommander.name : "Emperor"}
+                    allegiance={selectedCommander ? selectedCommander.allegiance : "Imperium"}
+                    size="md"
+                  />
+                );
+                return isExternal ? (
+                  <a
+                    href={portraitUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    title={`Open official link for ${selectedCommander ? selectedCommander.name : "The Emperor"}`}
+                    className="cursor-pointer hover:opacity-90 active:scale-95 transition-all shrink-0"
+                  >
+                    {inner}
+                  </a>
+                ) : inner;
+              })()}
               <div className="flex-1 min-w-0">
                 <span className="text-[6px] font-display font-black text-slate-500 tracking-widest block uppercase">
                   COMMAND SIGNATURE
@@ -845,15 +862,35 @@ export function SpaceScene() {
             {selectedCommander ? (
               <div className={`flex flex-col gap-2 relative ${selectedCommander.allegiance === "Chaos" ? "glitch-active" : ""}`}>
                 <div className="flex gap-2.5 items-start border-b border-amber-900/10 pb-2.5">
-                  <CommanderPortrait
-                    src={selectedCommander.portrait}
-                    alt={selectedCommander.portraitAlt}
-                    name={selectedCommander.name}
-                    allegiance={selectedCommander.allegiance}
-                    status={selectedCommander.status}
-                    size="lg"
-                    priority={true}
-                  />
+                  {selectedCommander.portrait?.startsWith("http") ? (
+                    <a
+                      href={selectedCommander.portrait}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      title={`Open official link for ${selectedCommander.name}`}
+                      className="cursor-pointer hover:opacity-90 active:scale-95 transition-all shrink-0"
+                    >
+                      <CommanderPortrait
+                        src={selectedCommander.portrait}
+                        alt={selectedCommander.portraitAlt}
+                        name={selectedCommander.name}
+                        allegiance={selectedCommander.allegiance}
+                        status={selectedCommander.status}
+                        size="lg"
+                        priority={true}
+                      />
+                    </a>
+                  ) : (
+                    <CommanderPortrait
+                      src={selectedCommander.portrait}
+                      alt={selectedCommander.portraitAlt}
+                      name={selectedCommander.name}
+                      allegiance={selectedCommander.allegiance}
+                      status={selectedCommander.status}
+                      size="lg"
+                      priority={true}
+                    />
+                  )}
                   <div className="flex-1 min-w-0">
                     <h4 className="font-display text-[10px] font-black text-starlight-white uppercase tracking-wider">
                       {selectedCommander.name}
@@ -955,6 +992,152 @@ export function SpaceScene() {
                   >
                     Deploy Fleet
                   </button>
+                </div>
+
+                {/* External links */}
+                {selectedCommander.portrait?.startsWith("http") && (
+                  <div className="grid grid-cols-2 gap-1.5 mt-1.5">
+                    <a
+                      href={selectedCommander.portrait}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="py-1 border border-amber-900/30 hover:border-amber-500 bg-amber-950/20 text-amber-400 rounded text-[7px] font-display uppercase tracking-widest cursor-pointer text-center flex items-center justify-center gap-1 active:scale-95"
+                    >
+                      <span>
+                        {selectedCommander.portrait.includes("gallery")
+                          ? "View Gallery"
+                          : selectedCommander.portrait.includes("shop")
+                          ? "View Shop"
+                          : "View Wiki"}
+                      </span>
+                      <span>↗</span>
+                    </a>
+                    {selectedCommander.galleryUrl ? (
+                      <a
+                        href={selectedCommander.galleryUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="py-1 border border-amber-900/30 hover:border-amber-500 bg-amber-950/20 text-amber-400 rounded text-[7px] font-display uppercase tracking-widest cursor-pointer text-center flex items-center justify-center gap-1 active:scale-95"
+                      >
+                        <span>View Gallery</span>
+                        <span>↗</span>
+                      </a>
+                    ) : (
+                      <div className="border border-slate-900/40 bg-slate-950/20 text-slate-600 rounded text-[7px] font-display uppercase tracking-widest flex items-center justify-center select-none">
+                        No Alt Gallery
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            ) : highlightTarget === "Golden Throne" ? (
+              <div className="flex flex-col gap-2 relative">
+                <div className="flex gap-2.5 items-start border-b border-amber-900/10 pb-2.5">
+                  <a
+                    href="https://warhammer40k.fandom.com/wiki/Emperor_of_Mankind"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    title="Open official link for The Emperor of Mankind"
+                    className="cursor-pointer hover:opacity-90 active:scale-95 transition-all shrink-0"
+                  >
+                    <CommanderPortrait
+                      src="https://warhammer40k.fandom.com/wiki/Emperor_of_Mankind"
+                      alt="The Emperor of Mankind"
+                      name="Emperor"
+                      allegiance="Imperium"
+                      status="Active"
+                      size="lg"
+                      priority={true}
+                    />
+                  </a>
+                  <div className="flex-1 min-w-0">
+                    <h4 className="font-display text-[10px] font-black text-yellow-500 uppercase tracking-wider animate-pulse">
+                      The Emperor of Mankind
+                    </h4>
+                    <p className="text-[7px] text-slate-500 font-body uppercase mt-0.5">
+                      God-Emperor & Master of Mankind
+                    </p>
+
+                    {/* Status indicator badges */}
+                    <div className="mt-1.5 flex flex-wrap gap-1">
+                      <span className="text-[6px] font-display font-black px-1.5 py-0.5 rounded tracking-widest uppercase border border-yellow-500/40 text-yellow-500 bg-yellow-950/15 animate-pulse">
+                        ENTOMBED / SACRED ACTIVE
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Details list info */}
+                <div className="space-y-1.5 font-display text-[8px] tracking-wider text-slate-400 uppercase">
+                  <p>
+                    <strong className="text-slate-200">Legion:</strong> Imperium / Legio Custodes
+                  </p>
+                  <p>
+                    <strong className="text-slate-200">Loyalty level:</strong> Eternal Sovereign
+                  </p>
+                  <p>
+                    <strong className="text-slate-200">Target sector:</strong> Segmentum Solar (Terra)
+                  </p>
+                  <p>
+                    <strong className="text-slate-200">Current task:</strong> Guiding Astronomican psychic beacon across the Warp.
+                  </p>
+                </div>
+
+                {/* Tactical stats bar */}
+                <div className="mt-2 space-y-1.5">
+                  <div className="flex justify-between text-[7px] font-display text-slate-500 tracking-wider">
+                    <span>PSYCHIC POWER:</span>
+                    <span className="text-yellow-500 font-bold">100%</span>
+                  </div>
+                  <div className="w-full bg-slate-900 h-1.5 rounded-full overflow-hidden border border-amber-900/10">
+                    <div className="bg-yellow-500 h-full w-full" />
+                  </div>
+
+                  <div className="flex justify-between text-[7px] font-display text-slate-500 tracking-wider">
+                    <span>WARP RESISTANCE:</span>
+                    <span className="text-cyan-400 font-bold">100%</span>
+                  </div>
+                  <div className="w-full bg-slate-900 h-1.5 rounded-full overflow-hidden border border-amber-900/10">
+                    <div className="bg-cyan-400 h-full w-full" />
+                  </div>
+                </div>
+
+                {/* Heretic or loyalist badges */}
+                <div className="mt-2.5">
+                  <div className="flex items-center gap-1.5 border border-yellow-500/30 bg-yellow-950/20 px-2.5 py-1 text-[8px] font-black uppercase tracking-widest text-yellow-400 rounded">
+                    👑 MASTER OF HUMANITY
+                  </div>
+                </div>
+
+                {/* Tactical command triggers */}
+                <div className="grid grid-cols-2 gap-1.5 mt-2">
+                  <button
+                    onClick={() => setHighlightTarget("Terra Prime")}
+                    className="py-1 border border-slate-900 hover:border-amber-900/40 bg-slate-900 text-slate-400 rounded text-[7px] font-display uppercase tracking-widest cursor-pointer active:scale-95"
+                    aria-label="Focus Terra Prime"
+                  >
+                    Focus Terra
+                  </button>
+                  <button
+                    onClick={() => alert("The Emperor directs all battlefleets through the Astronomican.")}
+                    className="py-1 border border-slate-900 hover:border-amber-900/40 bg-slate-900 text-slate-400 rounded text-[7px] font-display uppercase tracking-widest cursor-pointer active:scale-95"
+                    aria-label="Initiate Emperor Directive"
+                  >
+                    Psychic Pulse
+                  </button>
+                </div>
+
+                {/* External links */}
+                <div className="grid grid-cols-1 gap-1.5 mt-1.5">
+                  <a
+                    href="https://warhammer40k.fandom.com/wiki/Emperor_of_Mankind"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="py-1 border border-amber-900/30 hover:border-amber-500 bg-amber-950/20 text-amber-400 rounded text-[7px] font-display uppercase tracking-widest cursor-pointer text-center flex items-center justify-center gap-1 active:scale-95"
+                  >
+                    <span>View Wiki</span>
+                    <span>↗</span>
+                  </a>
                 </div>
               </div>
             ) : (

@@ -20,6 +20,7 @@ export interface Commander {
   };
   portrait: string;
   portraitAlt: string;
+  galleryUrl?: string;
 }
 
 export interface Planet {
@@ -82,7 +83,7 @@ export const commanders: Commander[] = [
     aura: "blue-gold",
     threatLevel: "Controlled",
     currentOrder: "Coordinate Imperial defense lines across multiple sectors.",
-    portrait: "/warhammer/portraits/roboute-guilliman.jpg",
+    portrait: "https://40k.gallery/tag/roboute-guilliman/",
     portraitAlt: "Roboute Guilliman portrait",
     stats: { commandPower: 98, fleetControl: 95, warpResistance: 78, corruptionRisk: 2, moraleImpact: 96 }
   },
@@ -99,7 +100,7 @@ export const commanders: Commander[] = [
     aura: "forest-green-gold",
     threatLevel: "High",
     currentOrder: "Eliminate traitor fleets near the warp corridor.",
-    portrait: "/warhammer/portraits/lion-el-jonson.jpg",
+    portrait: "https://warhammer40k.fandom.com/wiki/Lion_El%27Jonson",
     portraitAlt: "Lion El'Jonson portrait",
     stats: { commandPower: 92, fleetControl: 88, warpResistance: 90, corruptionRisk: 5, moraleImpact: 85 }
   },
@@ -116,7 +117,7 @@ export const commanders: Commander[] = [
     aura: "gold-red",
     threatLevel: "Sacred",
     currentOrder: "Inspire nearby Imperial forces with legacy aura.",
-    portrait: "/warhammer/portraits/sanguinius.jpg",
+    portrait: "https://warhammer40k.fandom.com/wiki/Sanguinius",
     portraitAlt: "Sanguinius portrait",
     stats: { commandPower: 95, fleetControl: 80, warpResistance: 95, corruptionRisk: 0, moraleImpact: 100 }
   },
@@ -133,7 +134,7 @@ export const commanders: Commander[] = [
     aura: "ice-blue",
     threatLevel: "Unknown",
     currentOrder: "Awaiting return signal from deep void.",
-    portrait: "/warhammer/portraits/leman-russ.jpg",
+    portrait: "https://warhammer40k.fandom.com/wiki/Leman_Russ",
     portraitAlt: "Leman Russ portrait",
     stats: { commandPower: 88, fleetControl: 75, warpResistance: 85, corruptionRisk: 8, moraleImpact: 90 }
   },
@@ -150,7 +151,7 @@ export const commanders: Commander[] = [
     aura: "yellow-gold",
     threatLevel: "Fortified",
     currentOrder: "Maintain orbital bastion protocols.",
-    portrait: "/warhammer/portraits/rogal-dorn.jpg",
+    portrait: "https://warhammer40k.fandom.com/wiki/Rogal_Dorn",
     portraitAlt: "Rogal Dorn portrait",
     stats: { commandPower: 90, fleetControl: 85, warpResistance: 80, corruptionRisk: 1, moraleImpact: 92 }
   },
@@ -167,7 +168,7 @@ export const commanders: Commander[] = [
     aura: "green-fire",
     threatLevel: "Stable",
     currentOrder: "Recover ancient forge relics.",
-    portrait: "/warhammer/portraits/vulkan.jpg",
+    portrait: "https://warhammer40k.fandom.com/wiki/Vulkan",
     portraitAlt: "Vulkan portrait",
     stats: { commandPower: 86, fleetControl: 70, warpResistance: 88, corruptionRisk: 2, moraleImpact: 89 }
   },
@@ -184,7 +185,7 @@ export const commanders: Commander[] = [
     aura: "white-red",
     threatLevel: "Mobile",
     currentOrder: "Conduct high-speed void raids.",
-    portrait: "/warhammer/portraits/jaghatai-khan.jpg",
+    portrait: "https://warhammer40k.fandom.com/wiki/Jaghatai_Khan",
     portraitAlt: "Jaghatai Khan portrait",
     stats: { commandPower: 85, fleetControl: 80, warpResistance: 76, corruptionRisk: 10, moraleImpact: 87 }
   },
@@ -201,7 +202,7 @@ export const commanders: Commander[] = [
     aura: "shadow-purple",
     threatLevel: "Classified",
     currentOrder: "Hunt traitor entities in the warp.",
-    portrait: "/warhammer/portraits/corvus-corax.jpg",
+    portrait: "https://warhammer40k.fandom.com/wiki/Corvus_Corax",
     portraitAlt: "Corvus Corax portrait",
     stats: { commandPower: 87, fleetControl: 74, warpResistance: 86, corruptionRisk: 15, moraleImpact: 80 }
   },
@@ -218,7 +219,7 @@ export const commanders: Commander[] = [
     aura: "steel-cyan",
     threatLevel: "Memorial",
     currentOrder: "Boost Iron Hands machine doctrine.",
-    portrait: "/warhammer/portraits/ferrus-manus.jpg",
+    portrait: "https://warhammer40k.fandom.com/wiki/Ferrus_Manus",
     portraitAlt: "Ferrus Manus portrait",
     stats: { commandPower: 82, fleetControl: 80, warpResistance: 70, corruptionRisk: 5, moraleImpact: 78 }
   },
@@ -235,7 +236,7 @@ export const commanders: Commander[] = [
     aura: "black-red",
     threatLevel: "Mythic",
     currentOrder: "Manifest as historical threat simulation.",
-    portrait: "/warhammer/portraits/horus-lupercal.jpg",
+    portrait: "https://warhammer40k.fandom.com/wiki/Horus",
     portraitAlt: "Horus Lupercal portrait",
     stats: { commandPower: 99, fleetControl: 98, warpResistance: 12, corruptionRisk: 100, moraleImpact: 95 }
   },
@@ -252,8 +253,9 @@ export const commanders: Commander[] = [
     aura: "black-gold-red",
     threatLevel: "Extreme",
     currentOrder: "Launch Black Crusade pressure against Imperial sectors.",
-    portrait: "/warhammer/portraits/abaddon-the-despoiler.jpg",
+    portrait: "https://www.warhammer.com/en-WW/shop/Abaddon-the-Despoiler-2019",
     portraitAlt: "Abaddon the Despoiler portrait",
+    galleryUrl: "https://40k.gallery/?s=Abaddon+the+Despoiler",
     stats: { commandPower: 97, fleetControl: 94, warpResistance: 25, corruptionRisk: 95, moraleImpact: 90 }
   },
   {
@@ -269,7 +271,7 @@ export const commanders: Commander[] = [
     aura: "crimson-purple",
     threatLevel: "Extreme",
     currentOrder: "Destabilize Astronomican signal with warp sorcery.",
-    portrait: "/warhammer/portraits/magnus-the-red.jpg",
+    portrait: "https://warhammer40k.fandom.com/wiki/Magnus_the_Red",
     portraitAlt: "Magnus the Red portrait",
     stats: { commandPower: 94, fleetControl: 70, warpResistance: 10, corruptionRisk: 98, moraleImpact: 85 }
   },
@@ -286,7 +288,7 @@ export const commanders: Commander[] = [
     aura: "sickly-green",
     threatLevel: "Extreme",
     currentOrder: "Spread plague corruption across contested worlds.",
-    portrait: "/warhammer/portraits/mortarion.jpg",
+    portrait: "https://warhammer40k.fandom.com/wiki/Mortarion",
     portraitAlt: "Mortarion portrait",
     stats: { commandPower: 90, fleetControl: 78, warpResistance: 22, corruptionRisk: 99, moraleImpact: 80 }
   },
@@ -303,7 +305,7 @@ export const commanders: Commander[] = [
     aura: "blood-red",
     threatLevel: "Catastrophic",
     currentOrder: "Break Imperial siege lines through direct assault.",
-    portrait: "/warhammer/portraits/angron.jpg",
+    portrait: "https://warhammer40k.fandom.com/wiki/Angron",
     portraitAlt: "Angron portrait",
     stats: { commandPower: 92, fleetControl: 60, warpResistance: 5, corruptionRisk: 100, moraleImpact: 92 }
   },
@@ -320,7 +322,7 @@ export const commanders: Commander[] = [
     aura: "pink-purple",
     threatLevel: "High",
     currentOrder: "Corrupt noble houses and command channels.",
-    portrait: "/warhammer/portraits/fulgrim.jpg",
+    portrait: "https://warhammer40k.fandom.com/wiki/Fulgrim",
     portraitAlt: "Fulgrim portrait",
     stats: { commandPower: 88, fleetControl: 75, warpResistance: 15, corruptionRisk: 96, moraleImpact: 84 }
   },
@@ -337,7 +339,7 @@ export const commanders: Commander[] = [
     aura: "iron-orange",
     threatLevel: "Extreme",
     currentOrder: "Conduct planetary siege and fortress breach operations.",
-    portrait: "/warhammer/portraits/perturabo.jpg",
+    portrait: "https://warhammer40k.fandom.com/wiki/Perturabo",
     portraitAlt: "Perturabo portrait",
     stats: { commandPower: 91, fleetControl: 85, warpResistance: 30, corruptionRisk: 90, moraleImpact: 82 }
   },
@@ -354,7 +356,7 @@ export const commanders: Commander[] = [
     aura: "dark-red-purple",
     threatLevel: "High",
     currentOrder: "Seed cult uprisings across hive worlds.",
-    portrait: "/warhammer/portraits/lorgar-aurelian.jpg",
+    portrait: "https://warhammer40k.fandom.com/wiki/Lorgar",
     portraitAlt: "Lorgar Aurelian portrait",
     stats: { commandPower: 86, fleetControl: 65, warpResistance: 20, corruptionRisk: 92, moraleImpact: 88 }
   },
@@ -371,7 +373,7 @@ export const commanders: Commander[] = [
     aura: "midnight-blue",
     threatLevel: "Legacy Terror",
     currentOrder: "Manifest fear effect in historical simulation.",
-    portrait: "/warhammer/portraits/konrad-curze.jpg",
+    portrait: "https://warhammer40k.fandom.com/wiki/Konrad_Curze",
     portraitAlt: "Konrad Curze portrait",
     stats: { commandPower: 83, fleetControl: 58, warpResistance: 40, corruptionRisk: 80, moraleImpact: 75 }
   },
@@ -388,7 +390,7 @@ export const commanders: Commander[] = [
     aura: "teal-green",
     threatLevel: "Unclear",
     currentOrder: "Obfuscate command intelligence.",
-    portrait: "/warhammer/portraits/alpharius-omegon.jpg",
+    portrait: "https://warhammer40k.fandom.com/wiki/Alpharius_Omegon",
     portraitAlt: "Alpharius Omegon portrait",
     stats: { commandPower: 85, fleetControl: 82, warpResistance: 60, corruptionRisk: 45, moraleImpact: 80 }
   }
